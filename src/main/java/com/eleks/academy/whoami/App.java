@@ -1,39 +1,46 @@
 package com.eleks.academy.whoami;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import com.eleks.academy.whoami.core.Game;
-import com.eleks.academy.whoami.core.impl.RandomGame;
-import com.eleks.academy.whoami.core.impl.RandomPlayer;
+import com.eleks.academy.whoami.networking.client.ClientPlayer;
+import com.eleks.academy.whoami.networking.server.ServerImpl;
 
-/**
- * Hello world!
- *
- */
 public class App {
-	public static void main(String[] args) {
-		System.out.println("Game Init!");
-		
-		List<String> characters = List.of("Batman", "Superman");
-		List<String> questions = List.of("Am i a human?", "Am i a character from a movie?");
-		List<String> guessess = List.of("Batman", "Superman");
-		
-		Game game = new RandomGame(characters);
-		game.addPlayer(new RandomPlayer("Test1", questions, guessess));
-		game.addPlayer(new RandomPlayer("Test2", questions, guessess));
+
+	public static void main(String[] args) throws IOException {
+
+		ServerImpl server = new ServerImpl(888);
+
+		Game game = server.startGame();
+
+		var socket = server.waitForPlayer(game);
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+		boolean gameStatus = true;
+
+		var playerName = reader.readLine();
+
+		server.addPlayer(new ClientPlayer(playerName, socket));
+
 		game.assignCharacters();
+
 		game.initGame();
-		while (!game.isFinished()) {
+
+		while (gameStatus) {
 			boolean turnResult = game.makeTurn();
+
 			while (turnResult) {
 				turnResult = game.makeTurn();
 			}
 			game.changeTurn();
+			gameStatus = !game.isFinished();
 		}
-		
-		
-		
+
+		server.stopServer(socket, reader);
 	}
-	
 
 }
