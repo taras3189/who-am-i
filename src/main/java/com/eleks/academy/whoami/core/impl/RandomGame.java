@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.Player;
 import com.eleks.academy.whoami.core.Turn;
-import com.eleks.academy.whoami.networking.client.ClientPlayer;
 
 public class RandomGame implements Game {
 
@@ -22,21 +21,20 @@ public class RandomGame implements Game {
 	private static final TimeUnit UNIT = TimeUnit.MINUTES;
 
 	private Map<String, String> playersCharacter = new ConcurrentHashMap<>();
-	private final List<Player> players;
-	private final List<String> availableCharacters;
+	private List<Player> players = new ArrayList<>();
+	private List<String> availableCharacters;
 	private Turn currentTurn;
 
 	
 	private final static String YES = "Yes";
 	private final static String NO = "No";
 	
-	public RandomGame(List<Player> players, List<String> availableCharacters) { 
+	public RandomGame(List<String> availableCharacters) {
 		this.availableCharacters = new ArrayList<String>(availableCharacters);
-		this.players = new ArrayList<>(players.size());
-		players.forEach(this::addPlayer);
 	}
 
-	private void addPlayer(Player player) {
+	@Override
+	public void addPlayer(Player player) {
 		// TODO: Add test to ensure that player has not been added to the lists when failed to obtain suggestion
 		Future<String> maybeCharacter = player.suggestCharacter();
 		try {
@@ -89,7 +87,8 @@ public class RandomGame implements Game {
 		
 	}
 
-	private void assignCharacters() {
+	@Override
+	public void assignCharacters() {
 		players.stream().map(Player::getName).parallel().map(f -> {
 			// TODO: extract into a configuration parameters
 			try {
@@ -108,8 +107,8 @@ public class RandomGame implements Game {
 	
 	@Override
 	public void initGame() {
-		this.assignCharacters();
 		this.currentTurn = new TurnImpl(this.players);
+		
 	}
 
 
@@ -127,21 +126,6 @@ public class RandomGame implements Game {
 	@Override
 	public void changeTurn() {
 		this.currentTurn.changeTurn();
-	}
-
-	@Override
-	public void play() {
-		boolean gameStatus = true;
-		
-		while (gameStatus) {
-			boolean turnResult = this.makeTurn();
-
-			while (turnResult) {
-				turnResult = this.makeTurn();
-			}
-			this.changeTurn();
-			gameStatus = !this.isFinished();
-		}
 	}
 
 }

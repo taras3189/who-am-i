@@ -69,12 +69,6 @@ public class RandomPlayer implements Player {
 		return CompletableFuture.completedFuture(characterPool.iterator().next());
 	}
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	
 	
 }

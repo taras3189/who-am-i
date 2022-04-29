@@ -16,10 +16,12 @@ class RandomGameTest {
 
 	@Test
 	void askAllPlayersForCharacterSuggestions() {
+		Game game = new RandomGame(List.of("c"));
 		TestPlayer p1 = new TestPlayer("P1");
 		TestPlayer p2 = new TestPlayer("P2");
-		Game game = new RandomGame(List.of(p1, p2), List.of("c"));
-		game.initGame();
+		game.addPlayer(p1);
+		game.addPlayer(p2);
+		game.assignCharacters();
 		assertAll(new Executable[] {
 				() -> assertTrue(p1.suggested),
 				() -> assertTrue(p2.suggested),
@@ -69,12 +71,6 @@ class RandomGameTest {
 		@Override
 		public String answerGuess(String guess, String character) {
 			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void close() {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}
