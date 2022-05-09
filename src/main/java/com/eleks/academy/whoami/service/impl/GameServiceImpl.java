@@ -1,7 +1,9 @@
 package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.Game;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
+import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -42,9 +44,8 @@ public class GameServiceImpl implements GameService {
 	public void enrollToGame(String id, String player) {
 		this.gameRepository.findById(id)
 				.filter(Game::isAvailable)
-				.filter(game -> !game.hasPlayer(player))
 				.ifPresentOrElse(
-						game -> game.addPlayer(player),
+						game -> game.makeTurn(new Answer(player)),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
 						}
@@ -63,7 +64,7 @@ public class GameServiceImpl implements GameService {
 		this.gameRepository.findById(id)
 				.filter(game -> game.hasPlayer(player))
 				.ifPresentOrElse(
-						game -> game.suggestCharacter(player, suggestion.getCharacter()),
+						game -> game.makeTurn(new Answer(player, suggestion.getCharacter())),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.getReasonPhrase());
 						});
@@ -72,13 +73,12 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public Optional<GameDetails> startGame(String id, String player) {
 		UnaryOperator<Game> startGame = game -> {
-			game.startGame();
+			game.makeTurn(new StartGameAnswer(player));
 
 			return game;
 		};
 
 		return this.gameRepository.findById(id)
-				.filter(Game::isReadyToStart)
 				.map(startGame)
 				.map(GameDetails::of);
 	}

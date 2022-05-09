@@ -57,7 +57,7 @@ public class GameController {
 		this.gameService.suggestCharacter(id, player, suggestion);
 	}
 
-	@PatchMapping("/{id}")
+	@PostMapping("/{id}")
 	public ResponseEntity<GameDetails> startGame(@PathVariable("id") String id,
 												 @RequestHeader(PLAYER) String player) {
 		return this.gameService.startGame(id, player)

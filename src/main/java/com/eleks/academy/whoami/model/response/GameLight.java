@@ -21,7 +21,7 @@ public class GameLight {
 	public static GameLight of(Game game) {
 		return GameLight.builder()
 				.id(game.getId())
-				.status(game.getStatus().name())
+				.status(game.getStatus())
 				.playersInGame(game.getPlayersInGame())
 				.build();
 	}

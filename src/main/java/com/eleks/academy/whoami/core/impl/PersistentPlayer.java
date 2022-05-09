@@ -1,18 +1,10 @@
 package com.eleks.academy.whoami.core.impl;
 
 import com.eleks.academy.whoami.core.Player;
-import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.Future;
 
-@RequiredArgsConstructor(staticName = "of")
-public class PersistentPlayer implements Player {
-
-	private final String name;
-
-	public String getId() {
-		return this.name;
-	}
+public record PersistentPlayer(String name) implements Player {
 
 	@Override
 	public Future<String> getName() {
